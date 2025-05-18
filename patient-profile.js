@@ -1,6 +1,6 @@
 /**
  * Version: 1.0.0
- * Author: Your Name
+ * Author: Declan Dover
  * Date: 2025-05-19
  * Description: The patient profile is the part of the system where an individual patient’s personal details and
    health records are displayed and can be edited by the patient as well as health professionals.
