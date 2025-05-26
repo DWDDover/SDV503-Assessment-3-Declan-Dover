@@ -61,6 +61,8 @@ function generatePatientProfile() {                                             
         city: randomNZCity(),                                                                               //generates a random city
         dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }).toISOString().slice(0, 10),    //generates a random date of birth between 18 and 90 years old and formats it to YYYY-MM-DD
         patientId: faker.string.uuid().slice(0, 8),                                                         //generates a random 8 character Unique ID for the patient ID
+        patientMeds: addRandomMeds(),
+        patientTestResults : addRandomResults()                                                      
     };
     }
     function createDataSet(size) { //creates a dataset of random patient profiles

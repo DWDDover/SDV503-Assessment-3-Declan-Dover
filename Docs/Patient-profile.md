@@ -1,3 +1,0 @@
-# Patient Profile
-
-## Structural Design
