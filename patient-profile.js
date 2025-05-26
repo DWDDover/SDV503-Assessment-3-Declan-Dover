@@ -8,14 +8,15 @@
 
 const { faker } = require('@faker-js/faker'); //importing the faker library to generate random data
 // Import the readline module for handling command line input/output
-/*
+
 const readline = require('readline');
 // Import the fs (filesystem) module for reading/writing files
 const fs = require('fs');
+
+/*
 // Define the file where tasks will be saved
-const FILE = 'tasks.json';
-const FILE2 = 'patients.json';
-// Initialize an empty array to store tasks
+const FILE = 'patients.json';
+// Initialize an empty array to store patients
 let patients = [];
 let staff = [];
 // Check if the tasks.json file exists
@@ -42,15 +43,24 @@ if (fs.existsSync(FILE2)) {
   }
 }
 */
-function generatePatientProfile() { //creates a random patient profile
+//function to return a random NZ city for creation of the fake patients
+function randomNZCity () {
+  //create an array of some nz cities
+  cities = ['Auckland', 'Christchurch', 'Manukau City', 'Wellington', 'Northcote', 'Hamilton', 'Tauranga', 'Lower Hutt', 'Dunedin', 'Palmerston North', 'Napier',
+    'New Plymouth', 'Rotorua', 'Whangarei', 'Invercargill', 'Nelson', 'Gisborne', 'Timaru', 'Blenheim', 'Taupo', 'Cambridge', 'Napier', 'New Plymouth']
+  return cities[Math.floor(Math.random() * cities.length)]; //returns a random city from the array
+}
+
+function generatePatientProfile() {                                                                         //creates a random patient profile
     return {
-        name: faker.person.fullName(), //generates a random full name
-        email: faker.internet.email(), //generates a random email address
-        phone: faker.phone.number(), //generates a random phone number
-        address: faker.location.streetAddress(), //generates a random street address
-        city: faker.location.city(), //generates a random city
-        dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }), //generates a random date of birth between 18 and 90 years old
-        patientId: faker.string.uuid(), //generates a random Unique ID for the patient ID
+        firstName: faker.person.firstName(),                                                                //generates a random first name
+        lastName: faker.person.lastName(),                                                                  //generates a random last name
+        email: faker.internet.email(),                                                                      //generates a random email address
+        phone: faker.phone.number(({ style: 'national' })),                                                 //generates a random phone number
+        address: faker.location.streetAddress(),                                                            //generates a random street address
+        city: randomNZCity(),                                                                               //generates a random city
+        dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }).toISOString().slice(0, 10),    //generates a random date of birth between 18 and 90 years old and formats it to YYYY-MM-DD
+        patientId: faker.string.uuid().slice(0, 8),                                                         //generates a random 8 character Unique ID for the patient ID
     };
     }
     function createDataSet(size) { //creates a dataset of random patient profiles
