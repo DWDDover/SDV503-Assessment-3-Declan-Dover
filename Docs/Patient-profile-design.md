@@ -131,6 +131,8 @@ promptMenuSelection() - a reusable function taking different menu objects as a p
 
 I applied dry methods to the coding of the project in various ways. One such way was creating reusable functions whenever possible in the code, this limits the amount of code in the program avoids repetition through functions that use the same logic for different purposes. Another way was the use of arrays and objects for storing data whenever possible. I used arrays to store my entire patient profile list and search results when needed. I used objects to store then menus for the program and a function to handle the input and navigation of these menus. I have seperated data and logic in the program wherever possible in order to make it easy to update or change in the future.
 
+
+
 Created reusable functions (e.g., one for displaying data, another for editing).
 
 Used objects or arrays to organize data.
