@@ -14,8 +14,9 @@ const readline = require('readline'); // Import the readline module for handling
 const fs = require('fs'); // Import the fs (filesystem) module for reading/writing files
 const FILE = 'patients.json';// Define the file where patients will be saved
 let patients = []; // Initialize an empty array to store patients
-// Create a readline interface for user input and output
-const rl = readline.createInterface({
+let currentPatient // variable to store the currently accessed patient
+let currentList  // variable to store the last accessed list in order to go back
+const rl = readline.createInterface({ // Create a readline interface for user input and output
   input: process.stdin,
   output: process.stdout
 });
@@ -32,22 +33,27 @@ if (fs.existsSync(FILE)) {
   }
 }
 
-/* This section of code creates a set of 200 patients with randomly generated information and stores them with a json file
-the size of the dataset can be changed */
+/* This section of code creates a set of 200 patients with randomly generated information and stores them within a json file
+the size of the dataset can be changed. It also contains the function that will be used to save the new patients array to
+the file after changes have been made */
 
 patients = []; //resets to an empty patients array
-patients.push(...createDataSet(200)); //adds 100 generated patients to the patients array
+patients.push(...createDataSet(200)); //adds 200 generated patients to the patients array
+
 function savePatients() {         // writes the patients array to the patients.json file
   fs.writeFileSync(FILE, JSON.stringify(patients, null, 2)); // Pretty-print with 2-space indentation
 }
+
 savePatients(); //executes savePatients to write the array to the patients.json file
+
 function randomNZCity () {    //function to return a random NZ city for creation of the fake patients
   //create an array of some nz cities
   cities = ['Auckland', 'Christchurch', 'Manukau City', 'Wellington', 'Northcote', 'Hamilton', 'Tauranga', 'Lower Hutt', 'Dunedin', 'Palmerston North', 'Napier',
     'New Plymouth', 'Rotorua', 'Whangarei', 'Invercargill', 'Nelson', 'Gisborne', 'Timaru', 'Blenheim', 'Taupo', 'Cambridge', 'Napier', 'New Plymouth']
   return cities[Math.floor(Math.random() * cities.length)]; //returns a random city from the array
 }
-function generatePatientProfile() {                                                                         //creates a random patient profile
+
+function generatePatientProfile() {                                                                         //creates a random patient profile object
     return {
         firstName: faker.person.firstName().slice(0, 11),                                                   //generates a random first name
         lastName: faker.person.lastName().slice(0, 11),                                                     //generates a random last name
@@ -57,19 +63,20 @@ function generatePatientProfile() {                                             
         city: randomNZCity(),                                                                               //generates a random city
         dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }).toISOString().slice(0, 10),    //generates a random date of birth between 18 and 90 years old and formats it to YYYY-MM-DD
         patientId: faker.string.uuid().slice(0, 8),                                                         //generates a random 8 character Unique ID for the patient ID
-        patientMedInfo: '',                                                                                 //placeholder for medical information
-        patientNotes: ''                                                                                    //placeholder for notes                      
+        patientMedInfo: [],                                                                                 //placeholder for medical information
+        patientNotes: []                                                                                    //placeholder for notes                      
     };
 }
-    function createDataSet(size) { //creates a dataset of random patient profiles
-        const dataSet = [];
-        for (let i = 0; i < size; i++) {
-            dataSet.push(generatePatientProfile());
+
+    function createDataSet(size) { //creates a dataset of random patient profiles of a given size
+        const dataSet = []; // creates an empty array
+        for (let i = 0; i < size; i++) { //creates a profile and adds it to the empty array a set amount of times
+            dataSet.push(generatePatientProfile()); 
         }
-        return dataSet;
+        return dataSet; //returns the empty array
     }
 
-/* This section of code is the patient profile application menus and CLI
+/* This section of code contains the patient profile menu object and various CLI functions
 */
 
 function startUp() {
@@ -97,8 +104,35 @@ const mainMenu = {
 }
 
 const findPatientMenu = {
+  menuText:  "\n1. Access patient from entire patient list\n2. Access patient by first name\n3. Access patient by last name\n4. Access patient by ID\n5. Access patient by city\n6. Back",
+  validOptions: ['1', '2', '3', '4', '5', '6'],
+  option1: () => selectByIndex(patients, patient => showDetails(patient)),
+  option2: () => patientSearch(0, results => selectByIndex(results, patient => showDetails(patient))),
+  option3: () => patientSearch(1, results => selectByIndex(results, patient => showDetails(patient))),
+  option4: () => patientSearch(2, results => selectByIndex(results, patient => showDetails(patient))),
+  option5: () => patientSearch(3, results => selectByIndex(results, patient => showDetails(patient))),
+  option6: () => promptMenuSelection(mainMenu),
+}
+
+const viewTableMenu = {
 
 }
+
+const editProfileMenu = {
+menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
+validOptions: ['1', '2', '3', '4', '5', '6'],
+option1: () => promptMenuSelection(editInfoMenu),
+option2: () => ,
+option3: () => ,
+option4: () => promptMenuSelection(findPatientMenu),
+option5: () => selectByIndex(currentList, patient => showDetails(patient)),
+option6: () => promptMenuSelection(mainMenu),
+}
+
+const editInfoMenu = {
+
+}
+
 function promptMenuSelection(menu) { //Reusable function for all menu selection within the program
   console.log(menu.menuText);
   rl.question('Please enter an option (1 to ' + menu.validOptions.length + '):', idx => {
@@ -135,7 +169,10 @@ function promptYN(question, callback) {
 
 /* This section of the code is for the functions to display patient lists or details and select patients from that list */
 
-const selectedPatient = patients[0];
+function showDetails(patient) {
+  console.log(patient);
+  promptMenuSelection(editProfileMenu);
+}
 
 function patientSearch(type, callback) {
   const prompts = [
@@ -158,15 +195,17 @@ function patientSearch(type, callback) {
     const results = patients.filter(patient =>
       patient[fields[type]].toLowerCase().includes(input.trim().toLowerCase())
     );
+    currentList = results;
     callback(results);
   });
 }
 
-function selectPatientByIndex(list, question) {                     // this function 
-  printPatientsTable(list);                                         // Show all patients
-  rl.question(question, num => {                                    // Ask for the patients index number
-    let idx = parseInt(num) - 1;                                    // Convert to array index
-      return list[idx];                                             // returns the selected patient to be used in various functions
+function selectByIndex(list, callback) {                                    // this function 
+  printPatientsTable(list);                                                 // Show all patients in the passed list
+  rl.question('Please enter the index of the selected patient:', num => {    // Ask for the patients index number
+    let idx = parseInt(num) - 1;                                              // Convert to array index
+    currentPatient = list[idx];
+    callback(list[idx]);                                                  // returns the selected patient to be used in various functions
   });
 }
 
@@ -219,7 +258,7 @@ function selectAndDelete(list) {
     askRepeat();
     return;
   }
-  printPatientsTable(list);                  //the print patients table is used to print a table based on the results of the search 
+  printPatientsTable(list);                  //the print patients table function is used to print a table based on the results of the search 
   rl.question(prompt, num => {               //the user is prompted to select a patient to delete from its index on the table
     const idx = parseInt(num) - 1;           //the input from the user is taken and used to select which patient to delete
     if (idx >= 0 && idx < list.length) {     //checks if the users selection is valid
