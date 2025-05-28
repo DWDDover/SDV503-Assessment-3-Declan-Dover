@@ -8,8 +8,8 @@ CLI will present a list of options
 
 1. Add new patient
 2. Remove a patient
-3. Display all patients
-4. Access patient profile
+3. View patient list
+4. Access and edit a patient profile
 
 #### Option 1 - add new patient
 
@@ -47,9 +47,21 @@ Options 3 and 4 will follow the same structure for last name and ID
 
 Option 5 will return to the top level menu
 
-#### Option 3 - Display all patients
+#### Option 3 - View all patients
 
-Will display the entire list of patients to the console
+Will display a new menu
+
+1. Display entire patient list
+2. View patients by first name
+3. View patients by last name
+4. View patients by city
+5. Back
+
+Option 1 will display the entire patient list
+Option two will display a prompt, 'Please enter a last name', upon valid entry a list off all patients with that last name will be displayed
+with an option to go back
+options 3 and 4 will function the same way with last name and email
+option 5 returns to the previous menu
 
 #### Option 4 - Access patient profile
 
@@ -71,9 +83,50 @@ After a profile is selected a new menu will be presented
 4. Add diagnoses
 5. Add test results
 6. Add Medical History
+7. Add notes
+8. Back
+
+Option 1 Will display all the stored details for that patient
+
+Option 2 Will display a new menu as follows
+
+1. Edit first name
+2. Edit last name
+3. Edit email
+4. Edit phone number
+5. Edit home address
+6. Edit city
+7. Back
+
+Each option will prompt the user to enter a new value for that field and back will return to the previous menu
+
+After any action is taken a relevant confirmation message will be displayed to the user
+
+### Required functionality
+
+Dataset Generation
+
+generatePatientProfile() - Make a profile using faker.js containing randomly generated information
+createDataSet() - create a dataset with an amount of patients as a parameter using the generatePatientProfile() function
+
+Program functionality
+
+startUp() - to display a greeting and start the program
+printPatientsTable() - view as a formatted table the entire list of patients or a list confined to one last name, first name, or city
+findPatientById() - Find a particular patient based on their 8 character ID
+selectPatientByIndex() - select a patient to be the currently accessed profile from a given list
+addPatient() - add a patient to the system
+deletePatient() - delete the currently selected patient
+displayDetails() - view the details of the currently selected patient
+addPatientDetails() - add new notes or medication to the selected patients profile
+editPatientDetails() - edit the details of the selected patients profile
+promptYN() - used for yes or no prompts throughout the program
+promptMenuSelection() - a reusable function taking different menu objects as a parameter to display menus and select options
 
 
 
+
+### Use of DRY (Don't Repeat Yourself) Methods
 
 Discuss how you:
 
@@ -84,5 +137,18 @@ Used objects or arrays to organize data.
 Avoided repetition by not duplicating similar logic.
 
 Made the program easy to update (e.g., separating data and logic).
+
+### Pair coding feedback
+
+In a discusison with my classmate blake we discussed seperating the processes of generating a random user set and the running the actual patient
+profile application. He suggested using a seperate generate-patients.js file that contains the code for generating the data set in order to keep 
+the code of the application cleaner. We also discussed user requirements and gave each other some pointers of funtions we would like to see from 
+the perspective of a user. I have logged these requirements in the format of user stories in the User-requirements.md file of my project. We also 
+discussed how we might re-use functions to better follow DRY principles, such as the parts of the system where user input is taken to navigate a menu, yes or no questions, or displaying lists of patients for different purposes.
+
+
+
+
+
 
 

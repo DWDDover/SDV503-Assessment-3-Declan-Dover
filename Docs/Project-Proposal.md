@@ -16,10 +16,8 @@ Photo
 
 Patients medical information:
 
-Medical history
-Diagnoses
-Test results
-Medication
+Medical history, e.g. Diagnoses, Test results, Medication
+Notes
 
 The application will be developed using the Agile XP software development model and delivered to the healthcare provider. It will provide all the fields of a patient profile described above, and use the CLI (command line interface) to take user input in order to manage, change, add profiles, or delta profiles. The proof of concept of this system will be presented to the healthcare provider in a time span of three weeks.
 
