@@ -116,6 +116,7 @@ printPatientsTable() - view as a formatted table the entire list of patients or 
 findPatientById() - Find a particular patient based on their 8 character ID
 selectPatientByIndex() - select a patient to be the currently accessed profile from a given list
 addPatient() - add a patient to the system
+deleteBySearch() - takes the search type as a parameter and calls delete patient based on that search
 deletePatient() - delete the currently selected patient
 displayDetails() - view the details of the currently selected patient
 addPatientDetails() - add new notes or medication to the selected patients profile
@@ -128,7 +129,7 @@ promptMenuSelection() - a reusable function taking different menu objects as a p
 
 ### Use of DRY (Don't Repeat Yourself) Methods
 
-Discuss how you:
+I applied dry methods to the coding of the project in various ways. One such way was creating reusable functions whenever possible in the code, this limits the amount of code in the program avoids repetition through functions that use the same logic for different purposes. Another way was the use of arrays and objects for storing data whenever possible. I used arrays to store my entire patient profile list and search results when needed. I used objects to store then menus for the program and a function to handle the input and navigation of these menus. I have seperated data and logic in the program wherever possible in order to make it easy to update or change in the future.
 
 Created reusable functions (e.g., one for displaying data, another for editing).
 
