@@ -204,8 +204,10 @@ function selectByIndex(list, callback) {                                    // t
   printPatientsTable(list);                                                 // Show all patients in the passed list
   rl.question('Please enter the index of the selected patient:', num => {    // Ask for the patients index number
     let idx = parseInt(num) - 1;                                              // Convert to array index
-    currentPatient = list[idx];
-    callback(list[idx]);                                                  // returns the selected patient to be used in various functions
+    const patient = list[idx];
+    const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); //finds the index of the selected patient in the main patient array using their patient ID
+    currentPatient = patients[mainIdx];                                   // sets the selected patient as the currently selected patient for perfomring funcitons on
+    callback(currentPatient);                                             // performs the function that was taken as a paremeter on the selected patient
   });
 }
 
