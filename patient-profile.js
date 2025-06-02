@@ -15,12 +15,16 @@ const fs = require('fs'); // Import the fs (filesystem) module for reading/writi
 const FILE = 'patients.json';// Define the file where patients will be saved
 let patients = []; // Initialize an empty array to store patients
 let currentPatient // variable to store the currently accessed patient
+let currentPatientIdx // variable to store the currently accessed patients index in the main array
 let currentList  // variable to store the last accessed list in order to go back
+let currentMenu // stores the current menu in order to go back
 const rl = readline.createInterface({ // Create a readline interface for user input and output
   input: process.stdin,
   output: process.stdout
 });
+
 // Check if the tasks.json file exists
+
 if (fs.existsSync(FILE)) {
   try {
     // If file exists, read its contents (synchronously)
@@ -87,10 +91,10 @@ function startUp() {
 const deletePatientMenu = {
   menuText:  "\n1. Delete by index from list of all patients\n2. find patient by first name\n3. find patient by last name\n4. find patient by ID\n5. Back",
   validOptions: ['1', '2', '3', '4', '5'],
-  option1: () => deleteBySearch(1),
-  option2: () => deleteBySearch(2),
-  option3: () => deleteBySearch(3),
-  option4: () => deleteBySearch(4),
+  option1: () => selectByIndex(patients, patient => deletePatient(patient)),
+  option2: () => patientSearch(0, results => selectByIndex(results, patient => deletePatient(patient))),
+  option3: () => patientSearch(1, results => selectByIndex(results, patient => deletePatient(patient))),
+  option4: () => patientSearch(2, results => selectByIndex(results, patient => deletePatient(patient))),
   option5: () => promptMenuSelection(mainMenu),
 }
 const mainMenu = {
@@ -102,7 +106,6 @@ const mainMenu = {
   option4: () => promptMenuSelection(findPatientMenu),
   option5: () => exitProgram(),
 }
-
 const findPatientMenu = {
   menuText:  "\n1. Access patient from entire patient list\n2. Access patient by first name\n3. Access patient by last name\n4. Access patient by ID\n5. Access patient by city\n6. Back",
   validOptions: ['1', '2', '3', '4', '5', '6'],
@@ -113,29 +116,36 @@ const findPatientMenu = {
   option5: () => patientSearch(3, results => selectByIndex(results, patient => showDetails(patient))),
   option6: () => promptMenuSelection(mainMenu),
 }
-
 const viewTableMenu = {
 
 }
-
 const editProfileMenu = {
 menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
 validOptions: ['1', '2', '3', '4', '5', '6'],
 option1: () => promptMenuSelection(editInfoMenu),
-option2: () => ,
-option3: () => ,
+option2: () => addNotes(currentPatient),
+option3: () => addInfo(currentPatient),
 option4: () => promptMenuSelection(findPatientMenu),
 option5: () => selectByIndex(currentList, patient => showDetails(patient)),
 option6: () => promptMenuSelection(mainMenu),
 }
-
 const editInfoMenu = {
-
+menuText: "\n1. Edit first name\n2. Edit last name\n3. Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu",
+validOptions: ['1', '2', '3', '4', '5', '6', '7', '8'],
+option1: () => editPatientInfo(0),
+option2: () => editPatientInfo(1),
+option3: () => editPatientInfo(2),
+option4: () => editPatientInfo(3),
+option5: () => editPatientInfo(4),
+option6: () => editPatientInfo(5),
+option7: () => showDetails(currentPatient),
+option8: () => promptMenuSelection(mainMenu),
 }
 
 function promptMenuSelection(menu) { //Reusable function for all menu selection within the program
+  currentMenu = menu;
   console.log(menu.menuText);
-  rl.question('Please enter an option (1 to ' + menu.validOptions.length + '):', idx => {
+  rl.question('\nPlease enter an option (1 to ' + menu.validOptions.length + '):', idx => {
     if (menu.validOptions.includes(idx.trim())) {
       switch (idx.trim()) {
         case '1': menu.option1(); break;
@@ -145,6 +155,7 @@ function promptMenuSelection(menu) { //Reusable function for all menu selection 
         case '5': menu.option5(); break;
         case '6': menu.option6(); break;
         case '7': menu.option7(); break;
+        case '8': menu.option8(); break;
     }
   }
     else {
@@ -187,34 +198,47 @@ function patientSearch(type, callback) {
     'patientId',
     'city'
   ];
-  if (type < 0 || type > 3) {
-    callback([]);
-    return;
-  }
   rl.question(prompts[type], input => {
     const results = patients.filter(patient =>
       patient[fields[type]].toLowerCase().includes(input.trim().toLowerCase())
     );
     currentList = results;
+    if (results.length < 1) {
+      console.log('\nNo patients found, please try another search');
+      promptMenuSelection(currentMenu);
+    }
+    else {
     callback(results);
+    }
   });
 }
 
 function selectByIndex(list, callback) {                                    // this function 
-  printPatientsTable(list);                                                 // Show all patients in the passed list
-  rl.question('Please enter the index of the selected patient:', num => {    // Ask for the patients index number
-    let idx = parseInt(num) - 1;                                              // Convert to array index
-    const patient = list[idx];
-    const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); //finds the index of the selected patient in the main patient array using their patient ID
-    currentPatient = patients[mainIdx];                                   // sets the selected patient as the currently selected patient for perfomring funcitons on
-    callback(currentPatient);                                             // performs the function that was taken as a paremeter on the selected patient
-  });
+printPatientsTable(list)
+  select(list);    
+  //helper to select a patient so that selection can be called again on incorrect input and not reprint the paitents table
+  function select (list) {                                          // Show all patients in the passed list
+  rl.question('\nPlease enter the index of the selected patient (1 to ' + list.length + '):', num => {   // Ask for the patients index number
+    if (num <= list.length) {                                               //check for vlaid entry
+      let idx = parseInt(num) - 1;                                              // Convert to array index
+      const patient = list[idx];                                                //stores the patient selected from the user
+      const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); //finds the index of the selected patient in the main patient array using their patient ID
+      currentPatient = patients[mainIdx];                                     // sets the selected patient as the currently selected patient for perfomring functIons on
+      currentPatientIdx = mainIdx                                             //stores the index of the current patient for use in the delte function
+      callback(currentPatient);   // performs the function that was taken as a paremeter on the selected patient
+    }
+    else {
+      console.log('\nInvalid index, please enter a valid number (1 to ' + list.length + ')'); //tells the patient their input was invalid a a guide to what is a valid input
+      select(list);   //recalls the selectByIndex funciton   
+    } 
+    });  
+  }    
 }
 
 function printPatientsTable(arr) { // Function to display all patients in a table format
   if (arr.length === 0) { // If there are no patients in the dataset
     console.log('\nNo patients found.');
-    return;
+    return false;
   }
   // Print table headers
   console.log('\n # |  First Name |  Last Name  |             email             |  Phone Number  |         Address         |       City       |     DOB    |    ID    |');
@@ -224,8 +248,8 @@ function printPatientsTable(arr) { // Function to display all patients in a tabl
     let row =
       String(idx + 1).padEnd(3) + '| ' +          // patient index number, padded for alignment
       patient.firstName.padEnd(11) + ' | ' +      // patient first name, padded for alignment
-      patient.lastName.padEnd(11) + ' | ' +       // patient last name, padded, with dollar sign
-      patient.email.padEnd(29) + ' | ' +          // patient email, always 2 decimal places, padded
+      patient.lastName.padEnd(11) + ' | ' +       // patient last name, padded for alignment
+      patient.email.padEnd(29) + ' | ' +          // patient email, padded for alignment
       patient.phone.padEnd(12) + ' | ' +          // patient ph. number, padded for alignment
       patient.address.padEnd(23) + ' | ' +        // patient address, padded for alignment
       patient.city.padEnd(16) + ' | ' +           // patient city, padded for alignment
@@ -240,36 +264,21 @@ function printPatientsTable(arr) { // Function to display all patients in a tabl
 function addNewPatient(){
   
 }
-// this function is used to delete a user by searching and selecting from the search results
-// the type of search is defined by the menu option that was selected to call this function
-// and passed into the function by the type parameter
-function deleteBySearch(type) { 
-  const prompt = '\nPlease select a patient to delete by entering their index: ';
-  // Helper to ask if user wants to delete another patient
-  function askRepeat(input) {
-      if (input) {
-        promptMenuSelection(deletePatientMenu);
-      } else {
-        promptMenuSelection(mainMenu);
-      }
-    }
-  // Helper to select and delete from a list
-function selectAndDelete(list) {
-  if (!list || list.length === 0) {          // if the list is empty a message will be returned and the user will be asked if they want to
-    console.log('\nNo patients found.');       // search again
-    askRepeat();
-    return;
-  }
-  printPatientsTable(list);                  //the print patients table function is used to print a table based on the results of the search 
-  rl.question(prompt, num => {               //the user is prompted to select a patient to delete from its index on the table
-    const idx = parseInt(num) - 1;           //the input from the user is taken and used to select which patient to delete
-    if (idx >= 0 && idx < list.length) {     //checks if the users selection is valid
-      const patient = list[idx];             //assigns the chosen patient as the patient that will be deleted using their index in the given list
-      promptYN(`\nAre you sure you want to delete patient "${patient.firstName} ${patient.lastName}"? (y/n): `, confirmed => { //promptYN is used to confirm the user wants to delete the patient
+
+function addInfo() {
+
+}
+
+function addNotes() {
+
+}
+
+function deletePatient(patient) {
+  promptYN(`\nAre you sure you want to delete patient "${patient.firstName} ${patient.lastName}"? (y/n): `, confirmed => { //promptYN is used to confirm the user wants to delete the patient
         if (confirmed) {
           //if the user confirms the patient is deleted
           // Remove from main patients array and save
-          const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); // finds the index of the deleted patient in the main patients array using their unique ID
+          const mainIdx = currentPatientIdx; // finds the index of the deleted patient in the main patients using the stored variable from selectByIndex
           if (mainIdx !== -1) {              //if the patient is included in the main array 
             patients.splice(mainIdx, 1);     //the splice function is used to remove the patient from the main patients array
             savePatients();                  //the new patients array with the patient removed is saved by writing it to patients.json
@@ -278,33 +287,9 @@ function selectAndDelete(list) {
         } else {
           console.log('\nDeletion cancelled.'); //if the user answers no to the deletion confirmation an appropriate message is displayed
         }
-        askRepeat();                          //the askRepeat helper asks if the user would like to delete another patient and the process repeats if so
-      });
-    } else {
-      console.log('\nInvalid selection.');      //if the selection is invalid a message is displayed and the user is asked if they would like to delete another patient
-      askRepeat();
-    }
-  });
+        promptMenuSelection(deletePatientMenu);//after deletion the user is returned to the delte patient menu
+}) 
 }
-  //the type of search is defined by the type paramater, given in the menu object where this function is called, using a switch
-  switch (type) {
-  case 1:
-    selectAndDelete(patients);
-    break;
-  case 2:
-    patientSearch(0, results => selectAndDelete(results)); // search by first name
-    break;
-  case 3:
-    patientSearch(1, results => selectAndDelete(results)); // search by last name
-    break;
-  case 4:
-    patientSearch(2, results => selectAndDelete(results)); // search by ID
-    break;
-  default:
-    promptMenuSelection(mainMenu);
-}
-}
-
 
 function exitProgram() { //this function exits the program and closes the interface
   rl.close();
