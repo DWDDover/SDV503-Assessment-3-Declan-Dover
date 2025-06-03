@@ -2,15 +2,15 @@
 
 ## User Stories
 
-1. As a health professional, I want to view a patient’s profile, so that I can quickly assess their medical history.
+1. As a health professional, I want to view a patient’s profile, so that I can quickly assess their medical information.
 
 2. As a health professional, I want to add notes to a patient’s profile, so that future clinicians can see up-to-date information.
 
-3. As a health professional, I want to add a medication to a patient’s medication list, so that it reflects the most current treatment plan.
+3. As a health professional, I want to be able to find patients easily by first name, last name, ID, or city
 
-4. As a health professional, I want to be able to find patients easily by first name, last name, ID, or city
+4. As a health professional, I want to be able to view all patients within a specific city
 
-5. As a health professional, I want to be able to view all patients within a specific city
+5. As a health professional, I want to be able to export the list of patients to a CSV file
 
 6. As a patient, I want to view my personal and medical information, so that I can stay informed about my health.
 
@@ -31,10 +31,11 @@ Based on the user stories the requirements of the product are as follows:
 3. To add a new patient to the system
 4. To remove a patient from the system
 5. To edit the details or add details of a patient
-6. To add notes or medication to the profile of a patient
+6. To add notes or medical information to the profile of a patient
 7. To recognise and notify the user of an incorrect input
 8. To have an intuitive, text based interface for navigating the system
 9. To confirm to the user when they have made any changes on the system
+10. To export the list of patients and their personal detials to a CSV file for use elsewhere
 
 
 

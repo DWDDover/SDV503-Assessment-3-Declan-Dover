@@ -75,20 +75,16 @@ Displays a new menu
 
 A patient profile can be selected using the same structure as option 2 in the top level menu
 
-After a profile is selected a new menu will be presented
+After a profile is selected the current details of that patient will be displayed and a new menu will be presented
 
-1. View profile details
-2. Edit patient details
-3. Add medication
-4. Add diagnoses
-5. Add test results
-6. Add Medical History
-7. Add notes
-8. Back
+1. Edit patient information
+2. Add notes
+3. Add medical details
+4. Access another patient
+5. Back
+6. Main menu
 
-Option 1 Will display all the stored details for that patient
-
-Option 2 Will display a new menu as follows
+Option 1 Will display a new menu as follows
 
 1. Edit first name
 2. Edit last name
@@ -101,6 +97,8 @@ Option 2 Will display a new menu as follows
 Each option will prompt the user to enter a new value for that field and back will return to the previous menu
 
 After any action is taken a relevant confirmation message will be displayed to the user
+
+## Functionality Design
 
 ### Required functionality
 
@@ -124,14 +122,9 @@ editPatientDetails() - edit the details of the selected patients profile
 promptYN() - used for yes or no prompts throughout the program
 promptMenuSelection() - a reusable function taking different menu objects as a parameter to display menus and select options
 
-
-
-
 ### Use of DRY (Don't Repeat Yourself) Methods
 
-I applied dry methods to the coding of the project in various ways. One such way was creating reusable functions whenever possible in the code, this limits the amount of code in the program avoids repetition through functions that use the same logic for different purposes. Another way was the use of arrays and objects for storing data whenever possible. I used arrays to store my entire patient profile list and search results when needed. I used objects to store then menus for the program and a function to handle the input and navigation of these menus. I have seperated data and logic in the program wherever possible in order to make it easy to update or change in the future.
-
-
+I applied dry methods to the coding of the project in various ways. One such way was creating reusable functions whenever possible in the code, this limits the amount of code in the program avoids repetition through functions that use the same logic for different purposes. One way I did this was in the patientSearch() function, where it can take a type parameter and search patients based on different values and give different prompts corresponding to these searches based on the type of search that was called. Another way was the printPatientsTable() function. Instead of having a different function to print different lists of patients this function takes an array as a parameter and prints it in a consistent format, whether its the whole patients array or just 2 or 3 patients returned from a search. Another way was the use of arrays and objects for storing data whenever possible. I used arrays to store my entire patient profile list and search results when needed. I used objects to store then menus for the program and a function to handle the input and navigation of these menus. I have seperated data and logic in the program wherever possible in order to make it easy to update or change in the future.
 
 Created reusable functions (e.g., one for displaying data, another for editing).
 
