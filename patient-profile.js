@@ -151,6 +151,9 @@ function promptMenuSelection(menu) { //Reusable function for all menu selection 
     printPatientsTable(patients);     // the view table menu also needs the full table printed before the list of options
   }
   console.log(menu.menuText);
+  input();
+  //helper to repeat the prompt on invalid input
+  function input() {
   rl.question('\nPlease enter an option (1 to ' + menu.validOptions.length + '):', idx => {
     if (menu.validOptions.includes(idx.trim())) {
       switch (idx.trim()) {
@@ -165,9 +168,11 @@ function promptMenuSelection(menu) { //Reusable function for all menu selection 
     }
   }
     else {
-      console.log('\nPlease enter a valid option (1 to ' + menu.validOptions.length + ')');
+      console.log('\nInvalid option selected');
+      input();
     }
   })
+}
 }
 
 function promptYN(question, callback) {
