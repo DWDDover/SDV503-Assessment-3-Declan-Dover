@@ -117,7 +117,10 @@ const findPatientMenu = {
   option6: () => promptMenuSelection(mainMenu),
 }
 const viewTableMenu = {
-
+  menuText: "\nThis table contains all patients currently stored in the system\n1. Export patient table to CSV\n2. Back",
+  validOptions: ['1', '2'],
+  option1: () => exportToCSV(),
+  option2: () => promptMenuSelection(mainMenu),
 }
 const editProfileMenu = {
 menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
@@ -144,6 +147,9 @@ option8: () => promptMenuSelection(mainMenu),
 
 function promptMenuSelection(menu) { //Reusable function for all menu selection within the program
   currentMenu = menu;
+    if (menu == viewTableMenu) {
+    printPatientsTable(patients);     // the view table menu also needs the full table printed before the list of options
+  }
   console.log(menu.menuText);
   rl.question('\nPlease enter an option (1 to ' + menu.validOptions.length + '):', idx => {
     if (menu.validOptions.includes(idx.trim())) {
@@ -289,6 +295,31 @@ function deletePatient(patient) {
         }
         promptMenuSelection(deletePatientMenu);//after deletion the user is returned to the delte patient menu
 }) 
+}
+
+// Function to export all patients to a CSV file
+function exportToCSV() {
+  if (patients.length === 0) { // If there are no patients to export
+    console.log('\nNo patients to export.');
+    promptMenuSelection(viewTableMenu);
+  }
+  // Define the CSV column headers
+  const headers = ['First Name', 'Last Name', 'email', 'Phone Number', 'Address', 'City', 'DOB', 'ID'];
+  // Helper to escape any CSV field with commas or quotes
+  function esc(field) {
+    const str = String(field);
+    return (str.includes(',') || str.includes('"')) ? `"${str.replace(/"/g, '""')}"` : str;
+  }
+  // Start CSV with header row
+  let csv = headers.join(',') + '\n';
+  // Add a row for each patient, escaping fields if necessary
+  patients.forEach(e => {
+    csv += [e.firstName, e.lastName, e.email, e.phone, e.address, e.city, e.dateOfBirth, e.patientId].map(esc).join(',') + '\n';
+  });
+  // Write CSV data to file
+  fs.writeFileSync('patients.csv', csv);
+  console.log('\nPatients exported to patients.csv!');
+  promptMenuSelection(mainMenu);
 }
 
 function exitProgram() { //this function exits the program and closes the interface
