@@ -6,7 +6,9 @@
    health records are displayed and can be edited by the patient as well as health professionals.
  */
 
-/* This section of code imports the required packages and creates the empty patient array and json file
+/* This section of code imports the required packages, creates the empty patient array and json file
+and creates the variables that will be used to temporarily store values in order to go back or 
+perform functions on the selected patients. It also contains the code to run my tests.
 */
 
 const { faker } = require('@faker-js/faker'); //importing the faker library to generate random data
@@ -15,7 +17,6 @@ const fs = require('fs'); // Import the fs (filesystem) module for reading/writi
 const FILE = 'patients.json';// Define the file where patients will be saved
 let patients = []; // Initialize an empty array to store patients
 let currentPatient // variable to store the currently accessed patient
-let currentPatientIdx // variable to store the currently accessed patients index in the main array
 let currentList  // variable to store the last accessed list in order to go back
 let currentMenu // stores the current menu in order to go back
 const rl = readline.createInterface({ // Create a readline interface for user input and output
@@ -126,14 +127,14 @@ const editProfileMenu = {
 menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
 validOptions: ['1', '2', '3', '4', '5', '6'],
 option1: () => promptMenuSelection(editInfoMenu),
-option2: () => addNotes(currentPatient),
-option3: () => addInfo(currentPatient),
+option2: () => addNotes(currentPatient, 0),
+option3: () => addNotes(currentPatient, 1),
 option4: () => promptMenuSelection(findPatientMenu),
 option5: () => selectByIndex(currentList, patient => showDetails(patient)),
 option6: () => promptMenuSelection(mainMenu),
 }
 const editInfoMenu = {
-menuText: "\n1. Edit first name\n2. Edit last name\n3. Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu",
+menuText: "\n1. Edit first name\n2. Edit last name\n3. Add/Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu",
 validOptions: ['1', '2', '3', '4', '5', '6', '7', '8'],
 option1: () => editPatientInfo(0),
 option2: () => editPatientInfo(1),
@@ -174,16 +175,17 @@ function promptMenuSelection(menu) { //Reusable function for all menu selection 
   })
 }
 }
-
-function promptYN(question, callback) {
+//This function has been adapted from our class practice and will be used whenever the user is prompted to answer yes or no in order
+//to avoid repetition
+function promptYN(question, callback) { //the function takes the yes or no question that the user will be asked and a callback as parameters
     rl.question(question, answer => {
-        const ans = answer.trim().toLowerCase()
-        if(ans === 'y' || ans === 'yes') {
-            callback(true)
+        const ans = answer.trim().toLowerCase()   //converts the answer to lowercase and removes empty spaces
+        if(ans === 'y' || ans === 'yes') {    
+            callback(true)                        //if the answer is y, true is passed into the callback
         } else if( ans === 'n' || ans === 'no') {
-            callback(false)
+            callback(false)                       //if the answer is n, false is passed into the callback
         } else {
-            console.log('Please type y or n.')
+            console.log('Please type y or n.')    //if the input is neither y or n the user is prompted to enter a valid input and the question is repeated
             promptYN(question, callback)
         }
     })
@@ -192,34 +194,47 @@ function promptYN(question, callback) {
 /* This section of the code is for the functions to display patient lists or details and select patients from that list */
 
 function showDetails(patient) {
-  console.log(patient);
-  promptMenuSelection(editProfileMenu);
+  let details = '\nFirst name:         ' + 
+      patient.firstName + '\nLast name:          ' +      // patient first name
+      patient.lastName + '\nemail:              ' +       // patient last name
+      patient.email + '\nPhone number:       ' +          // patient email
+      patient.phone + '\nAddress:            ' +          // patient ph. number
+      patient.address + '\nCity:               ' +        // patient address
+      patient.city + '\nDOB:                ' +           // patient city
+      patient.dateOfBirth + '\nUnique ID:          ' +    // patient DOB
+      patient.patientId + '\nNotes:              \n- ' +   // patient ID
+      patient.patientNotes.join('\n-') + '\nMedical information: \n- ' + //Notes printed each on a new line
+      patient.patientMedInfo.join('\n-')                  //Medical information entries, each printed on a new line
+    console.log(details);
+  promptMenuSelection(editProfileMenu);                   //Display the options to edit the profile below the information
 }
 
 function patientSearch(type, callback) {
-  const prompts = [
+//Patient search takes a type to define the type of search and a callback parameter to perform other 
+//functions on the list of returned patients by the search                  
+  const prompts = [   //an array to store the different prompts that would be given to the user depending on the type of search
     '\nPlease enter a first name: ',
     '\nPlease enter a last name: ',
     '\nPlease enter an ID: ',
     '\nPlease enter a city: '
   ];
-  const fields = [
+  const fields = [    //an array of the different fields of a patient object that would be searched depending on the type of search
     'firstName',
     'lastName',
     'patientId',
     'city'
   ];
-  rl.question(prompts[type], input => {
+  rl.question(prompts[type], input => {    //a question to ask the user for search input, the prompt and field to be searched will depend on the type
     const results = patients.filter(patient =>
       patient[fields[type]].toLowerCase().includes(input.trim().toLowerCase())
     );
     currentList = results;
-    if (results.length < 1) {
+    if (results.length < 1) {             //if there are no results the user will be prompted to try another search
       console.log('\nNo patients found, please try another search');
       promptMenuSelection(currentMenu);
     }
     else {
-    callback(results);
+    callback(results);  //performs the callback parameter on the list of patients returned by the search, usually displaying the list and asking the user to select one by index
     }
   });
 }
@@ -230,7 +245,7 @@ printPatientsTable(list)
   //helper to select a patient so that selection can be called again on incorrect input and not reprint the paitents table
   function select (list) {                                          // Show all patients in the passed list
   rl.question('\nPlease enter the index of the selected patient (1 to ' + list.length + '):', num => {   // Ask for the patients index number
-    if (num <= list.length) {                                               //check for vlaid entry
+    if (num <= list.length) {                                               //check for valid entry
       let idx = parseInt(num) - 1;                                              // Convert to array index
       const patient = list[idx];                                                //stores the patient selected from the user
       const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); //finds the index of the selected patient in the main patient array using their patient ID
@@ -276,12 +291,23 @@ function addNewPatient(){
   
 }
 
-function addInfo() {
 
-}
-
-function addNotes() {
-
+function addNotes(patient, type) {      //function to add either notes or medical information to a patient depending on the type parameter
+  let prompts = ['enter a new note for', 'enter new medical information for'] //array to contain the two different prompts
+rl.question(`\nPlease ${prompts[type]} ${patient.firstName} ${patient.lastName}:`, note => { //question asked to the user depending on the type parameter
+    if (note.length < 1) {      //if input is empty the function will be called again and a message will be displayed
+    console.log('\nNo text detected');
+    addNotes(patient, type)
+  }
+  if (type == 0) {      //if type is 0 the entry is added to notes
+  patient.patientNotes.push(note);
+  }
+  if (type == 1) {      //if type is 1 the entry is added to medical information
+    patient.patientMedInfo.push(note);
+  }
+    console.log('\nNew entry: "' + note + '" has been added');  //confirmation message that the entry has been saved
+    showDetails(patient); //prints the new detials of the selected patient and brings up the edit patient menu again
+})
 }
 
 function deletePatient(patient) {
@@ -289,7 +315,7 @@ function deletePatient(patient) {
         if (confirmed) {
           //if the user confirms the patient is deleted
           // Remove from main patients array and save
-          const mainIdx = currentPatientIdx; // finds the index of the deleted patient in the main patients using the stored variable from selectByIndex
+          const mainIdx = patients.findIndex(p => p.patientId === patient.patientId); // finds the index of the deleted patient in the main patients using the unique ID
           if (mainIdx !== -1) {              //if the patient is included in the main array 
             patients.splice(mainIdx, 1);     //the splice function is used to remove the patient from the main patients array
             savePatients();                  //the new patients array with the patient removed is saved by writing it to patients.json
@@ -302,11 +328,11 @@ function deletePatient(patient) {
 }) 
 }
 
-// Function to export all patients to a CSV file
+// Function to export all patients to a CSV file, adapted from one of our SDV classes
 function exportToCSV() {
-  if (patients.length === 0) { // If there are no patients to export
-    console.log('\nNo patients to export.');
-    promptMenuSelection(viewTableMenu);
+  if (patients.length === 0) {                      // If there are no patients to export
+    console.log('\nNo patients to export.');        //an appropriate message is displayed
+    promptMenuSelection(viewTableMenu);             //and the user is returned to the previous menu
   }
   // Define the CSV column headers
   const headers = ['First Name', 'Last Name', 'email', 'Phone Number', 'Address', 'City', 'DOB', 'ID'];
@@ -331,5 +357,18 @@ function exitProgram() { //this function exits the program and closes the interf
   rl.close();
 }
 
-startUp();               //calling the startup function to start the program
-//rl.close();
+if (process.env.NODE_ENV === 'test') { //exports the necessary functions and the patients array to be tested in patient-profile-test.js
+  module.exports = {                   //if the program is running in test mode
+    selectByIndex,
+    rl,
+    printPatientsTable,
+    promptMenuSelection,
+    patients,
+    promptYN,
+    deletePatient,
+    patientSearch
+  };
+}
+if (process.env.NODE_ENV !== 'test') { //calling the startup function to start the program only if
+  startUp();                           //its not being run for testing purposes
+}
