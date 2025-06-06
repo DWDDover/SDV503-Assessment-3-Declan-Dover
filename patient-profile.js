@@ -87,6 +87,7 @@ with the text to be displayed and the logic that will be carried out depending o
 the menu objects are passed into the promptMenuSelection function found in the next section.
 */
 
+//the main menu of the program
 const mainMenu = {
   menuText:  "\n1. Add new patient\n2. Remove a patient\n3. View patient table\n4. Access or edit a patient profile\n5. Exit the program",
   validOptions: ['1', '2', '3', '4', '5'],
@@ -96,6 +97,7 @@ const mainMenu = {
   option4: () => promptMenuSelection(findPatientMenu),
   option5: () => exitProgram(),
 }
+//the menu to select and delete a patient
 const deletePatientMenu = {
   menuText:  "\n1. Delete by index from list of all patients\n2. find patient by first name\n3. find patient by last name\n4. find patient by ID\n5. Back",
   validOptions: ['1', '2', '3', '4', '5'],
@@ -105,6 +107,7 @@ const deletePatientMenu = {
   option4: () => patientSearch(2, results => selectByIndex(results, patient => deletePatient(patient))),
   option5: () => promptMenuSelection(mainMenu),
 }
+//the menu to access a patient from a search or the whole list
 const findPatientMenu = {
   menuText:  "\n1. Access patient from entire patient list\n2. Access patient by first name\n3. Access patient by last name\n4. Access patient by ID\n5. Access patient by city\n6. Back",
   validOptions: ['1', '2', '3', '4', '5', '6'],
@@ -115,12 +118,14 @@ const findPatientMenu = {
   option5: () => patientSearch(3, results => selectByIndex(results, patient => showDetails(patient))),
   option6: () => promptMenuSelection(mainMenu),
 }
+//the menu displayed after viewing all patients, gives to option to export the list to csv
 const viewTableMenu = {
   menuText: "\nThis table contains all patients currently stored in the system\n1. Export patient table to CSV\n2. Back",
   validOptions: ['1', '2'],
   option1: () => exportToCSV(),
   option2: () => promptMenuSelection(mainMenu),
 }
+//the menu to add or edit info of a selected patient
 const editProfileMenu = {
 menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
 validOptions: ['1', '2', '3', '4', '5', '6'],
@@ -131,6 +136,7 @@ option4: () => promptMenuSelection(findPatientMenu),
 option5: () => selectByIndex(currentList, patient => showDetails(patient)),
 option6: () => promptMenuSelection(mainMenu),
 }
+//the menu to edit individual fields of a patient
 const editInfoMenu = {
 menuText: "\n1. Edit first name\n2. Edit last name\n3. Add/Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu",
 validOptions: ['1', '2', '3', '4', '5', '6', '7', '8'],
@@ -153,7 +159,6 @@ function startUp() {
   console.log('\nPlease select an option from the menu by entering the corresponding number');
   promptMenuSelection(mainMenu);
 }
-
 //this is a Reusable function for all menu selection within the program. It takes the menu as a parameter
 //in order to display it to the user and take input
 //It also stores the accessed menu in a variable in order to go back
@@ -221,7 +226,6 @@ function showDetails(patient) {
     console.log(details);
   promptMenuSelection(editProfileMenu);                   //Display the options to edit the profile below the information
 }
-
 //this function takes a type to define the type of search and a callback parameter to perform other 
 //functions on the list of returned patients by the search  
 function patientSearch(type, callback) {                
@@ -339,7 +343,6 @@ function editPatientInfo(type) {
   })
 
 }
-
 //This funciton allows the user to add a new patient to the system, 4 basic values are asked for, with the option to edit the
 //  rest given after the patient is created.
 function addNewPatient(){
@@ -349,8 +352,8 @@ function addNewPatient(){
       rl.question('\nPlease enter patients email:', email => {
         rl.question('\nPlease enter patients phone number:', phone => {
           patients.push({ //a new patient is created based on the inputted values, I decided not to validate input so that a patient can still be made when one
-            firstName: firstName.trim(),  //or more values are not given the patient is added to the main patients array                                            
-            lastName: lastName.trim(),                                                     
+            firstName: firstName.trim().slice(0, 11),  //or more values are not given the patient is added to the main patients array                                            
+            lastName: lastName.trim().slice(0, 11),    //the first and last names are trimmed to 11 characters                                                 
             email: email.trim(),                                                       
             phone: phone,                                                 
             address: " ",                                               
@@ -375,7 +378,7 @@ function addNewPatient(){
     })
   })
 }
-
+//function to add either notes or medical info to a patient depending on given type parameter
 function addNotes(patient, type) {      //function to add either notes or medical information to a patient depending on the type parameter
   let prompts = ['enter a new note for', 'enter new medical information for'] //array to contain the two different prompts
 rl.question(`\nPlease ${prompts[type]} ${patient.firstName} ${patient.lastName}:`, note => { //question asked to the user depending on the type parameter
@@ -393,7 +396,7 @@ rl.question(`\nPlease ${prompts[type]} ${patient.firstName} ${patient.lastName}:
     showDetails(patient); //prints the new detials of the selected patient and brings up the edit patient menu again
 })
 }
-
+//function to delete a given patient
 function deletePatient(patient) {
   promptYN(`\nAre you sure you want to delete patient "${patient.firstName} ${patient.lastName}"? (y/n): `, confirmed => { //promptYN is used to confirm the user wants to delete the patient
         if (confirmed) {
@@ -411,7 +414,6 @@ function deletePatient(patient) {
         promptMenuSelection(deletePatientMenu);//after deletion the user is returned to the delte patient menu
 }) 
 }
-
 // Function to export all patients to a CSV file, adapted from one of our SDV classes
 function exportToCSV() {
   if (patients.length === 0) {                      // If there are no patients to export
