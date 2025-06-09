@@ -33,20 +33,18 @@ if (fs.existsSync(FILE)) {
     patients = JSON.parse(data);
   } catch (e) {
     // If there is any error, start with a new set of random patients
-    patients = [];
+  patients.push(...createDataSet(200)); //adds 200 generated patients to the patients array;
+  savePatients() //writes the array to the patients.json file
   }
+}
+
+function savePatients() {         // writes the patients array to the patients.json file
+  fs.writeFileSync(FILE, JSON.stringify(patients, null, 2)); // Pretty-print with 2-space indentation
 }
 
 /* This section of code creates a set of 200 patients with randomly generated information and stores them within a json file
 the size of the dataset can be changed. It also contains the function that will be used to save the new patients array to
 the file after changes have been made */
-
-patients = []; //resets to an empty patients array
-patients.push(...createDataSet(200)); //adds 200 generated patients to the patients array
-
-function savePatients() {         // writes the patients array to the patients.json file
-  fs.writeFileSync(FILE, JSON.stringify(patients, null, 2)); // Pretty-print with 2-space indentation
-}
 
 savePatients(); //executes savePatients to write the array to the patients.json file
 
@@ -72,13 +70,13 @@ function generatePatientProfile() {                                             
     };
 }
 
-    function createDataSet(size) { //creates a dataset of random patient profiles of a given size
-        const dataSet = []; // creates an empty array
-        for (let i = 0; i < size; i++) { //creates a profile and adds it to the empty array a set amount of times
-            dataSet.push(generatePatientProfile()); 
-        }
-        return dataSet; //returns the empty array
+function createDataSet(size) { //creates a dataset of random patient profiles of a given size
+  const dataSet = []; // creates an empty array
+    for (let i = 0; i < size; i++) { //creates a profile and adds it to the empty array a set amount of times
+      dataSet.push(generatePatientProfile()); 
     }
+    return dataSet; //returns the new array of patients
+}
 
 let currentList = patients// variable to store the last accessed list in order to go back, starts as the entire list
   
@@ -87,67 +85,68 @@ with the text to be displayed and the logic that will be carried out depending o
 the menu objects are passed into the promptMenuSelection function found in the next section.
 */
 
-//the main menu of the program
+//the main menu of the program with options for the 4 main functions and an option to exit. Functions are stored in options
+//that are accessed using the promptMenuSelection() function
 const mainMenu = {
-  menuText:  "\n1. Add new patient\n2. Remove a patient\n3. View patient table\n4. Access or edit a patient profile\n5. Exit the program",
-  validOptions: ['1', '2', '3', '4', '5'],
-  option1: () => addNewPatient(),
-  option2: () => promptMenuSelection(deletePatientMenu),
-  option3: () => promptMenuSelection(viewTableMenu),
-  option4: () => promptMenuSelection(findPatientMenu),
-  option5: () => exitProgram(),
+  menuText:  "\n1. Add new patient\n2. Remove a patient\n3. View/export patient table\n4. Access or edit a patient profile\n5. Exit the program", //text for menu options
+  validOptions: ['1', '2', '3', '4', '5'], //array of valid options for this menu, used by promptMenuSelection()
+  option1: () => addNewPatient(), //function to add a patient
+  option2: () => promptMenuSelection(deletePatientMenu), //opens the menu for deleting a patient
+  option3: () => promptMenuSelection(viewTableMenu), //opens the menu for viewing and exporting the table
+  option4: () => promptMenuSelection(findPatientMenu), //opens the menu for finding a specific patient
+  option5: () => exitProgram(), //closes the program
 }
-//the menu to select and delete a patient
+//the menu to select and delete a patient in various ways
 const deletePatientMenu = {
-  menuText:  "\n1. Delete by index from list of all patients\n2. find patient by first name\n3. find patient by last name\n4. find patient by ID\n5. Back",
-  validOptions: ['1', '2', '3', '4', '5'],
-  option1: () => selectByIndex(patients, patient => deletePatient(patient)),
-  option2: () => patientSearch(0, results => selectByIndex(results, patient => deletePatient(patient))),
-  option3: () => patientSearch(1, results => selectByIndex(results, patient => deletePatient(patient))),
-  option4: () => patientSearch(2, results => selectByIndex(results, patient => deletePatient(patient))),
-  option5: () => promptMenuSelection(mainMenu),
+  menuText:  "\n1. Delete by index from list of all patients\n2. find patient by first name\n3. find patient by last name\n4. find patient by ID\n5. Back", //text for menu options
+  validOptions: ['1', '2', '3', '4', '5'], //array of valid options for this menu, used by promptMenuSelection()
+  option1: () => selectByIndex(patients, patient => deletePatient(patient)), //select a patient from the entire list
+  option2: () => patientSearch(0, results => selectByIndex(results, patient => deletePatient(patient))), //select a patient by first name
+  option3: () => patientSearch(1, results => selectByIndex(results, patient => deletePatient(patient))), //select a patient by last name
+  option4: () => patientSearch(2, results => selectByIndex(results, patient => deletePatient(patient))), //select a patient via ID
+  option5: () => promptMenuSelection(mainMenu), //back to the main menu
 }
-//the menu to access a patient from a search or the whole list
+//the menu to access a patient from a search or to select from the whole list
 const findPatientMenu = {
-  menuText:  "\n1. Access patient from entire patient list\n2. Access patient by first name\n3. Access patient by last name\n4. Access patient by ID\n5. Access patient by city\n6. Back",
-  validOptions: ['1', '2', '3', '4', '5', '6'],
-  option1: () => selectByIndex(patients, patient => showDetails(patient)),
-  option2: () => patientSearch(0, results => selectByIndex(results, patient => showDetails(patient))),
-  option3: () => patientSearch(1, results => selectByIndex(results, patient => showDetails(patient))),
-  option4: () => patientSearch(2, results => selectByIndex(results, patient => showDetails(patient))),
-  option5: () => patientSearch(3, results => selectByIndex(results, patient => showDetails(patient))),
-  option6: () => promptMenuSelection(mainMenu),
+  menuText:  "\n1. Access patient from entire patient list\n2. Access patient by first name\n3. Access patient by last name\n4. Access patient by ID\n5. Access patient by city\n6. Back", //text for menu options
+  validOptions: ['1', '2', '3', '4', '5', '6'], //array of valid options for this menu, used by promptMenuSelection()
+  option1: () => selectByIndex(patients, patient => showDetails(patient)), //select from entire patient list
+  option2: () => patientSearch(0, results => selectByIndex(results, patient => showDetails(patient))), //select by first name
+  option3: () => patientSearch(1, results => selectByIndex(results, patient => showDetails(patient))), //select by last name
+  option4: () => patientSearch(2, results => selectByIndex(results, patient => showDetails(patient))), //select by city
+  option5: () => patientSearch(3, results => selectByIndex(results, patient => showDetails(patient))), //select by ID
+  option6: () => promptMenuSelection(mainMenu), //back to the main menu
 }
 //the menu displayed after viewing all patients, gives to option to export the list to csv
 const viewTableMenu = {
-  menuText: "\nThis table contains all patients currently stored in the system\n1. Export patient table to CSV\n2. Back",
-  validOptions: ['1', '2'],
-  option1: () => exportToCSV(),
-  option2: () => promptMenuSelection(mainMenu),
+  menuText: "\nThis table contains all patients currently stored in the system\n1. Export patient table to CSV\n2. Back", //text for menu options
+  validOptions: ['1', '2'], //array of valid options for this menu, used by promptMenuSelection()
+  option1: () => exportToCSV(), //exports the patient list to patients.CSV
+  option2: () => promptMenuSelection(mainMenu), //back to the main menu
 }
 //the menu to add or edit info of a selected patient
 const editProfileMenu = {
-menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu",
-validOptions: ['1', '2', '3', '4', '5', '6'],
-option1: () => promptMenuSelection(editInfoMenu),
-option2: () => addNotes(currentPatient, 0),
-option3: () => addNotes(currentPatient, 1),
-option4: () => promptMenuSelection(findPatientMenu),
-option5: () => selectByIndex(currentList, patient => showDetails(patient)),
-option6: () => promptMenuSelection(mainMenu),
+menuText:  "\n1. Edit patient information\n2. Add notes\n3. Add medical details\n4. Access another patient\n5. Back\n6. Main menu", //text for menu options
+validOptions: ['1', '2', '3', '4', '5', '6'], //array of valid options for this menu, used by promptMenuSelection()
+option1: () => promptMenuSelection(editInfoMenu), //brings up the menu to edit individual fields
+option2: () => addNotes(currentPatient, 0), //adds notes to the selected patient
+option3: () => addNotes(currentPatient, 1), //adds medical details to the selected patient
+option4: () => promptMenuSelection(findPatientMenu), //returns to the find patient menu
+option5: () => selectByIndex(currentList, patient => showDetails(patient)), //returns to the search results to find another patient
+option6: () => promptMenuSelection(mainMenu), //back to the main menu
 }
 //the menu to edit individual fields of a patient
 const editInfoMenu = {
-menuText: "\n1. Edit first name\n2. Edit last name\n3. Add/Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu",
-validOptions: ['1', '2', '3', '4', '5', '6', '7', '8'],
-option1: () => editPatientInfo(0),   //edit patient info function is called and the field being entered is chnaged depending on the type parameter
-option2: () => editPatientInfo(1),
-option3: () => editPatientInfo(2),
-option4: () => editPatientInfo(3),
-option5: () => editPatientInfo(4),
-option6: () => editPatientInfo(5),
-option7: () => showDetails(currentPatient),
-option8: () => promptMenuSelection(mainMenu),
+menuText: "\n1. Edit first name\n2. Edit last name\n3. Add/Edit email\n4. Edit phone number\n5. Edit address\n6. Edit city\n7. Back\n8. Main Menu", //text for menu options
+validOptions: ['1', '2', '3', '4', '5', '6', '7', '8'], //array of valid options for this menu, used by promptMenuSelection()
+option1: () => editPatientInfo(0),  //edit patient info function is called and the field being entered is chnaged depending on the type parameter, 0 is first name
+option2: () => editPatientInfo(1),  //1 is last name
+option3: () => editPatientInfo(2),  //2 is email
+option4: () => editPatientInfo(3),  //3 is phone number
+option5: () => editPatientInfo(4),  //4 is address
+option6: () => editPatientInfo(5),  //5 is city
+option7: () => showDetails(currentPatient), //back to the previous menu and the patients details
+option8: () => promptMenuSelection(mainMenu), //back to the main menu
 }
 
 /* This section contains the reusable functions to use the menu objects, start the program, and a reusable function 
@@ -155,9 +154,9 @@ to prompt the user for yes or no questions */
 
 //this function starts up the program by displaying a header and bringing up the main menu
 function startUp() {
-  console.log('\n------------------Patient Profile Management System-----------------------');
+  console.log('\n------------------Patient Profile Management System-----------------------'); //some welcome text and instructions
   console.log('\nPlease select an option from the menu by entering the corresponding number');
-  promptMenuSelection(mainMenu);
+  promptMenuSelection(mainMenu); //brings up the main menu
 }
 //this is a Reusable function for all menu selection within the program. It takes the menu as a parameter
 //in order to display it to the user and take input
@@ -275,7 +274,7 @@ printPatientsTable(list)
     }
     else {
       console.log('\nInvalid index, please enter a valid number (1 to ' + list.length + ')'); //tells the patient their input was invalid a a guide to what is a valid input
-      selectByIndex(list, callback);   //recalls the selectByIndex funciton   
+      select(list);   //recalls the selectByIndex funciton   
     } 
     });  
   }    
@@ -331,10 +330,11 @@ function editPatientInfo(type) {
     console.log('\nInvalid phone number');
     return editPatientInfo(type);
     }    
-    if (input.length > 0) {
-    currentPatient[fields[type]] = input;
+    if (input.length > 0) {  //input validation
+    currentPatient[fields[type]] = input; //changes the field being edited to the new value
+    savePatients() //saves the change to the patients.json file
     console.log(`\nNew ${prompts[type]} saved`);
-    showDetails(currentPatient);
+    showDetails(currentPatient); //shows the changed details
     }
     else { //more input validation
       console.log('\nInvalid input');
