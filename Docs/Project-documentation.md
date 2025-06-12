@@ -102,6 +102,16 @@ Overview:
 
 This Patient Profile Management System is a Node.js command-line application designed to help users manage patient records efficiently. It allows the user to create, view, edit, and delete patient profiles. It also includes features for searching patients, adding medical information or personal notes, and exporting the patient database to a CSV file. The system is designed for use by health professionals that are managing patient information.
 
+To install the packages required for this program type 
+
+npm install
+
+into your terminal
+
+Then to run the program navigate to the SDV503-Assessment-3 folder in the terminal and type
+
+node patient-profile
+
 Once the program starts, it displays a banner followed by the main menu.
 
 Main Menu Options:
